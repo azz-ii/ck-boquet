@@ -41,10 +41,21 @@ const createSelectedBloom = (flower: FlowerOption): SelectedBloom => ({
 
 const initialState = (): BouquetState => {
   try {
+    // Check search params first, then fall back to checking if it's in the hash
     const params = new URLSearchParams(window.location.search);
-    const bData = params.get("b");
+    let bData = params.get("b");
+    if (!bData && window.location.hash.includes("?b=")) {
+      bData = new URLSearchParams(window.location.hash.split("?")[1]).get("b");
+    }
+    if (!bData) {
+      const url = new URL(window.location.href);
+      bData = url.searchParams.get("b");
+    }
+
     if (bData) {
-      const decoded = JSON.parse(decodeURIComponent(atob(bData)));
+      // Revert URL-safe base64 characters AND preserve old '+' formatted strings
+      const base64 = bData.replace(/-/g, '+').replace(/_/g, '/').replace(/ /g, '+');
+      const decoded = JSON.parse(decodeURIComponent(atob(base64)));
 
       const selectedBlooms: SelectedBloom[] = [];
       for (const bloomData of decoded.s) {

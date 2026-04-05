@@ -22,7 +22,11 @@ export default function FinalBouquet({
       a: arrangement,
       m: message,
     };
-    const encoded = btoa(encodeURIComponent(JSON.stringify(bData)));
+    // use base64 encoding then replace + and / to make it url safe
+    let encoded = btoa(encodeURIComponent(JSON.stringify(bData)));
+    encoded = encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    
+    // get current base url without any search params that might conflict
     const url = new URL(window.location.href);
     url.searchParams.set("b", encoded);
     return url.toString();
