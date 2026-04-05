@@ -54,7 +54,10 @@ const initialState = (): BouquetState => {
 
     if (bData) {
       // Revert URL-safe base64 characters AND preserve old '+' formatted strings
-      const base64 = bData.replace(/-/g, '+').replace(/_/g, '/').replace(/ /g, '+');
+      const base64 = bData
+        .replace(/-/g, "+")
+        .replace(/_/g, "/")
+        .replace(/ /g, "+");
       const decoded = JSON.parse(decodeURIComponent(atob(base64)));
 
       const selectedBlooms: SelectedBloom[] = [];
