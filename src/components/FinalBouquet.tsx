@@ -14,7 +14,9 @@ export default function FinalBouquet({
   arrangement,
   message,
 }: FinalBouquetProps) {
-  const [status, setStatus] = useState<"idle" | "shortening" | "copied" | "shared" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "shortening" | "copied" | "shared" | "error"
+  >("idle");
 
   const getShareUrl = async () => {
     const bData = {
@@ -52,7 +54,7 @@ export default function FinalBouquet({
     } catch (e) {
       console.error("Link shortening failed:", e);
     }
-    
+
     // Fallback to long URL if shortening fails
     return longUrl;
   };
@@ -243,7 +245,11 @@ export default function FinalBouquet({
           onClick={copyLink}
           className="bg-black px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-white transition hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px] text-center"
         >
-          {status === "shortening" ? "GENERATING..." : status === "copied" ? "COPIED" : "COPY LINK"}
+          {status === "shortening"
+            ? "GENERATING..."
+            : status === "copied"
+              ? "COPIED"
+              : "COPY LINK"}
         </button>
         <button
           type="button"
