@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #2f2a22;
+  background: #f9f8f0;
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(191, 214, 179, 0.35),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(233, 214, 176, 0.28),
+      transparent 26%
+    ),
+    linear-gradient(180deg, #fbfaf2 0%, #f9f8f0 56%, #f5f1e7 100%);
+}
+
+::selection {
+  background: rgba(120, 146, 112, 0.2);
+}
+
+.paper-texture {
+  background-image:
+    radial-gradient(rgba(95, 82, 61, 0.05) 1px, transparent 1px),
+    radial-gradient(rgba(95, 82, 61, 0.03) 1px, transparent 1px);
+  background-position:
+    0 0,
+    12px 12px;
+  background-size: 24px 24px;
+}
