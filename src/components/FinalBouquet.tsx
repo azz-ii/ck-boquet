@@ -14,9 +14,9 @@ export default function FinalBouquet({
   arrangement,
   message,
 }: FinalBouquetProps) {
-  const [status, setStatus] = useState<"idle" | "copied" | "shared">("idle");
+  const [status, setStatus] = useState<"idle" | "shortening" | "copied" | "shared" | "error">("idle");
 
-  const getShareUrl = () => {
+  const getShareUrl = async () => {
     const bData = {
       s: selectedBlooms.map((b) => ({ id: b.id, sId: b.slotId })),
       a: arrangement,
@@ -32,11 +32,34 @@ export default function FinalBouquet({
     // get current base url without any search params that might conflict
     const url = new URL(window.location.href);
     url.searchParams.set("b", encoded);
-    return url.toString();
+    const longUrl = url.toString();
+
+    // Call a free shortening API to make the link shorter (cors-enabled)
+    try {
+      const response = await fetch("https://spoo.me/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Accept: "application/json",
+        },
+        body: new URLSearchParams({ url: longUrl }).toString(),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.short_url || longUrl;
+      }
+    } catch (e) {
+      console.error("Link shortening failed:", e);
+    }
+    
+    // Fallback to long URL if shortening fails
+    return longUrl;
   };
 
   const copyLink = async () => {
-    const url = getShareUrl();
+    setStatus("shortening");
+    const url = await getShareUrl();
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url);
@@ -59,7 +82,8 @@ export default function FinalBouquet({
   };
 
   const shareLink = async () => {
-    const url = getShareUrl();
+    setStatus("shortening");
+    const url = await getShareUrl();
     try {
       if (navigator.share) {
         await navigator.share({
@@ -215,15 +239,17 @@ export default function FinalBouquet({
       <div className="mt-14 flex items-center justify-center gap-2">
         <button
           type="button"
+          disabled={status === "shortening"}
           onClick={copyLink}
-          className="bg-black px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-white transition hover:bg-stone-800"
+          className="bg-black px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-white transition hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px] text-center"
         >
-          {status === "copied" ? "COPIED" : "COPY LINK"}
+          {status === "shortening" ? "GENERATING..." : status === "copied" ? "COPIED" : "COPY LINK"}
         </button>
         <button
           type="button"
+          disabled={status === "shortening"}
           onClick={shareLink}
-          className="bg-white border border-black px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-black transition hover:bg-stone-100"
+          className="bg-white border border-black px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-black transition hover:bg-stone-100 disabled:opacity-50 disabled:cursor-not-allowed min-w-[100px] text-center"
         >
           {status === "shared" ? "SHARED" : "SHARE"}
         </button>
