@@ -235,7 +235,9 @@ export default function App() {
           </>
         )}
 
-        <main className={`mt-6 rounded-[44px] ${!isSharedView ? 'border border-stone-200 bg-white/55 p-4 shadow-paper backdrop-blur sm:p-6' : ''}`}>
+        <main
+          className={`mt-6 rounded-[44px] ${!isSharedView ? "border border-stone-200 bg-white/55 p-4 shadow-paper backdrop-blur sm:p-6" : ""}`}
+        >
           <AnimatePresence mode="wait">
             {state.step === "selection" && (
               <motion.section
