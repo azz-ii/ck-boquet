@@ -39,17 +39,48 @@ const createSelectedBloom = (flower: FlowerOption): SelectedBloom => ({
   slotId: `${flower.id}-${crypto.randomUUID()}`,
 });
 
-const initialState = (): BouquetState => ({
-  step: "selection",
-  selectedBlooms: [],
-  arrangement: {},
-  message: {
-    dear: "",
-    body: "",
-    sincerely: "",
-  },
-  warning: null,
-});
+const initialState = (): BouquetState => {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const bData = params.get("b");
+    if (bData) {
+      const decoded = JSON.parse(decodeURIComponent(atob(bData)));
+
+      const selectedBlooms: SelectedBloom[] = [];
+      for (const bloomData of decoded.s) {
+        const flower = FLOWERS.find((f) => f.id === bloomData.id);
+        if (flower) {
+          selectedBlooms.push({ ...flower, slotId: bloomData.sId });
+        }
+      }
+
+      if (selectedBlooms.length > 0) {
+        return {
+          step: "final",
+          selectedBlooms,
+          arrangement: decoded.a || {},
+          message: decoded.m || { dear: "", body: "", sincerely: "" },
+          warning: null,
+          isSharedView: true,
+        };
+      }
+    }
+  } catch (e) {
+    console.error("Failed to parse shared bouquet", e);
+  }
+
+  return {
+    step: "selection",
+    selectedBlooms: [],
+    arrangement: {},
+    message: {
+      dear: "",
+      body: "",
+      sincerely: "",
+    },
+    warning: null,
+  };
+};
 
 function reducer(state: BouquetState, action: Action): BouquetState {
   switch (action.type) {
@@ -172,33 +203,39 @@ export default function App() {
     dispatch({ type: "NEXT_STEP" });
   };
 
+  const isSharedView = state.isSharedView;
+
   return (
     <div className="min-h-screen px-4 py-6 text-stone-800 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <header className="mb-6 flex flex-col gap-4 rounded-[36px] border border-stone-200 bg-white/70 px-6 py-5 shadow-sm backdrop-blur sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-stone-500">
-              Bloom Bouquet Builder
-            </p>
-            <h1 className="mt-2 text-4xl font-semibold tracking-tight text-stone-800 sm:text-5xl">
-              Shape a bouquet with a hand-drawn feel
-            </h1>
-          </div>
-          <div className="rounded-full border border-stone-300/80 bg-[#fffdfa] px-4 py-2 text-sm text-stone-600 shadow-sm">
-            {selectedCountLabel}
-          </div>
-        </header>
+        {!isSharedView && (
+          <>
+            <header className="mb-6 flex flex-col gap-4 rounded-[36px] border border-stone-200 bg-white/70 px-6 py-5 shadow-sm backdrop-blur sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-[0.35em] text-stone-500">
+                  Bloom Bouquet Builder
+                </p>
+                <h1 className="mt-2 text-4xl font-semibold tracking-tight text-stone-800 sm:text-5xl">
+                  Shape a bouquet with a hand-drawn feel
+                </h1>
+              </div>
+              <div className="rounded-full border border-stone-300/80 bg-[#fffdfa] px-4 py-2 text-sm text-stone-600 shadow-sm">
+                {selectedCountLabel}
+              </div>
+            </header>
 
-        <ProgressBar
-          currentStep={currentStepIndex}
-          totalSteps={TOTAL_STEPS}
-          onBack={handleBack}
-          onNext={handleNext}
-          canGoBack={canGoBack}
-          canGoNext={canGoNext}
-        />
+            <ProgressBar
+              currentStep={currentStepIndex}
+              totalSteps={TOTAL_STEPS}
+              onBack={handleBack}
+              onNext={handleNext}
+              canGoBack={canGoBack}
+              canGoNext={canGoNext}
+            />
+          </>
+        )}
 
-        <main className="mt-6 rounded-[44px] border border-stone-200 bg-white/55 p-4 shadow-paper backdrop-blur sm:p-6">
+        <main className={`mt-6 rounded-[44px] ${!isSharedView ? 'border border-stone-200 bg-white/55 p-4 shadow-paper backdrop-blur sm:p-6' : ''}`}>
           <AnimatePresence mode="wait">
             {state.step === "selection" && (
               <motion.section

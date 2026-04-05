@@ -44,4 +44,5 @@ export type BouquetState = {
     sincerely: string;
   };
   warning: string | null;
+  isSharedView?: boolean;
 };

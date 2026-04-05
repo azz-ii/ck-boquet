@@ -16,8 +16,20 @@ export default function FinalBouquet({
 }: FinalBouquetProps) {
   const [status, setStatus] = useState<"idle" | "copied" | "shared">("idle");
 
+  const getShareUrl = () => {
+    const bData = {
+      s: selectedBlooms.map((b) => ({ id: b.id, sId: b.slotId })),
+      a: arrangement,
+      m: message,
+    };
+    const encoded = btoa(encodeURIComponent(JSON.stringify(bData)));
+    const url = new URL(window.location.href);
+    url.searchParams.set("b", encoded);
+    return url.toString();
+  };
+
   const copyLink = async () => {
-    const url = window.location.href;
+    const url = getShareUrl();
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url);
@@ -40,7 +52,7 @@ export default function FinalBouquet({
   };
 
   const shareLink = async () => {
-    const url = window.location.href;
+    const url = getShareUrl();
     try {
       if (navigator.share) {
         await navigator.share({
